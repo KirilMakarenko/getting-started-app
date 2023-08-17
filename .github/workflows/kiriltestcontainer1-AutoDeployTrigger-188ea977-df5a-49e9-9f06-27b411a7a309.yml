@@ -1,0 +1,42 @@
+name: Trigger auto deployment for kiriltestcontainer1
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/kiriltestcontainer1-AutoDeployTrigger-188ea977-df5a-49e9-9f06-27b411a7a309.yml'
+
+  # Allow mannually trigger 
+  workflow_dispatch:
+      
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.KIRILTESTCONTAINER1_AZURE_CREDENTIALS }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          appSourcePath: ${{ github.workspace }} 
+          registryUrl: kirilcontainers.azurecr.io
+          registryUsername: ${{ secrets.KIRILTESTCONTAINER1_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.KIRILTESTCONTAINER1_REGISTRY_PASSWORD }}
+          containerAppName: kiriltestcontainer1
+          resourceGroup: Kiril_Test_Env
+          imageToBuild: kirilcontainers.azurecr.io/kiriltestcontainer1:${{ github.sha }}
+          
+
+     
+
